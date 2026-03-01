@@ -5,11 +5,11 @@ const projects = [
 
 export default function ProjectsPage() {
   return (
-    <section style={{ marginTop: "2rem" }}>
+    <section className="section">
       <h2>Projects</h2>
-      <ul>
+      <ul className="list-reset">
         {projects.map((project) => (
-          <li key={project.name} style={{ marginBottom: "1rem" }}>
+          <li key={project.name} className="project-item">
             <strong>{project.name}</strong>
             <p>{project.description}</p>
           </li>
