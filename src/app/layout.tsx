@@ -1,28 +1,38 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import CommandPalette from "@/components/command-palette";
+import { getAllEntries } from "@/lib/entries";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Your Name",
-    template: "%s | Your Name"
+    default: "Stephen",
+    template: "%s | Stephen"
   },
-  description: "Personal website built with Next.js, TypeScript, Tailwind, and MDX."
+  description: "A scrolling collection of MDX entries with dedicated detail pages."
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const entries = await getAllEntries();
+  const commandItems = [
+    { label: "Home", href: "/", detail: "Main feed", group: "pages" as const },
+    { label: "About", href: "/about", detail: "Profile and approach", group: "pages" as const },
+    { label: "Projects", href: "/projects", detail: "Project list", group: "pages" as const },
+    ...entries.map((entry) => ({
+      label: entry.title,
+      href: `/entries/${entry.slug}`,
+      detail: entry.slug,
+      group: "entries" as const
+    }))
+  ];
+
   return (
     <html lang="en">
       <body>
         <main className="site-main">
-          <header className="site-header">
-            <h1 className="site-title">Your Name</h1>
-            <nav className="site-nav">
-              <Link href="/">Home</Link>
-              <Link href="/about">About</Link>
-              <Link href="/projects">Projects</Link>
-            </nav>
-          </header>
+          <div className="site-title-row">
+            <h1 className="site-title">Stephen</h1>
+            <CommandPalette items={commandItems} />
+          </div>
           {children}
         </main>
       </body>

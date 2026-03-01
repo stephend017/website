@@ -5,7 +5,7 @@ const projects = [
 
 export default function ProjectsPage() {
   return (
-    <section className="section">
+    <section className="section section--projects">
       <h2>Projects</h2>
       <ul className="list-reset">
         {projects.map((project) => (
