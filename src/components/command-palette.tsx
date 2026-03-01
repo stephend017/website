@@ -21,11 +21,6 @@ export default function CommandPalette({ items }: CommandPaletteProps) {
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  function openPalette() {
-    setOpen(true);
-    setSelectedIndex(0);
-  }
-
   function closePalette() {
     setOpen(false);
     setQuery("");
@@ -96,11 +91,6 @@ export default function CommandPalette({ items }: CommandPaletteProps) {
 
   return (
     <>
-      <button type="button" className="palette-trigger" onClick={openPalette}>
-        <span className="palette-trigger-title">Search Explorer</span>
-        <span className="palette-trigger-shortcut">Ctrl+P</span>
-      </button>
-
       {open ? (
         <div className="palette-overlay" role="presentation" onClick={closePalette}>
           <div
