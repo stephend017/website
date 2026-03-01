@@ -42,6 +42,11 @@ body {
   width: min(1100px, 100% - 2rem);
   margin: 0 auto;
   padding: 1rem 0 2rem;
+  transition: filter 180ms ease;
+}
+
+body.palette-open .site-main {
+  filter: blur(8px);
 }
 
 .site-title-row {
@@ -72,6 +77,7 @@ body {
   inset: 0;
   z-index: 200;
   background: rgba(0, 0, 0, 0.58);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   display: grid;
   place-items: start center;
@@ -178,9 +184,9 @@ body {
 
 .home-hero {
   margin-top: 1rem;
-  border: 1px solid var(--border);
+  border: 0px;
   border-radius: 0.45rem;
-  background: linear-gradient(180deg, #252526 0%, #2d2d30 100%);
+  background: #007acc;
   padding: clamp(1.2rem, 3vw, 2rem);
   box-shadow: var(--shadow);
 }

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 type CommandItem = {
   label: string;
@@ -36,6 +37,14 @@ export default function CommandPalette({ items }: CommandPaletteProps) {
       return haystack.includes(normalizedQuery);
     });
   }, [items, query]);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.body.classList.toggle("palette-open", open);
+    return () => {
+      document.body.classList.remove("palette-open");
+    };
+  }, [open]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -89,64 +98,63 @@ export default function CommandPalette({ items }: CommandPaletteProps) {
 
   const selectedItem = filteredItems[selectedIndex];
 
-  return (
-    <>
-      {open ? (
-        <div className="palette-overlay" role="presentation" onClick={closePalette}>
-          <div
-            className="palette-shell"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Command palette"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="palette-input-wrap">
-              <span className="palette-prefix">&gt;</span>
-              <input
-                className="palette-input"
-                type="text"
-                autoFocus
-                value={query}
-                onChange={(event) => {
-                  setQuery(event.target.value);
-                  setSelectedIndex(0);
-                }}
-                placeholder="Type a page or entry name"
-                aria-label="Search"
-              />
-            </div>
+  if (!open || typeof document === "undefined") return null;
 
-            <div className="palette-results" role="listbox" aria-label="Search results">
-              {filteredItems.length === 0 ? (
-                <p className="palette-empty">No matches</p>
-              ) : (
-                filteredItems.map((item, index) => {
-                  const isSelected = index === selectedIndex;
-                  return (
-                    <Link
-                      key={`${item.group}:${item.href}`}
-                      href={item.href}
-                      className={`palette-item ${isSelected ? "palette-item--selected" : ""}`}
-                      onMouseEnter={() => setSelectedIndex(index)}
-                      onClick={closePalette}
-                    >
-                      <span className="palette-item-label">{item.label}</span>
-                      <span className="palette-item-meta">{item.detail}</span>
-                    </Link>
-                  );
-                })
-              )}
-            </div>
-
-            {selectedItem ? (
-              <div className="palette-footer">
-                <span>{selectedItem.group === "entries" ? "Entry" : "Page"}</span>
-                <span>{selectedItem.href}</span>
-              </div>
-            ) : null}
-          </div>
+  return createPortal(
+    <div className="palette-overlay" role="presentation" onClick={closePalette}>
+      <div
+        className="palette-shell"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Command palette"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="palette-input-wrap">
+          <span className="palette-prefix">&gt;</span>
+          <input
+            className="palette-input"
+            type="text"
+            autoFocus
+            value={query}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setSelectedIndex(0);
+            }}
+            placeholder="Type a page or entry name"
+            aria-label="Search"
+          />
         </div>
-      ) : null}
-    </>
+
+        <div className="palette-results" role="listbox" aria-label="Search results">
+          {filteredItems.length === 0 ? (
+            <p className="palette-empty">No matches</p>
+          ) : (
+            filteredItems.map((item, index) => {
+              const isSelected = index === selectedIndex;
+              return (
+                <Link
+                  key={`${item.group}:${item.href}`}
+                  href={item.href}
+                  className={`palette-item ${isSelected ? "palette-item--selected" : ""}`}
+                  onMouseEnter={() => setSelectedIndex(index)}
+                  onClick={closePalette}
+                >
+                  <span className="palette-item-label">{item.label}</span>
+                  <span className="palette-item-meta">{item.detail}</span>
+                </Link>
+              );
+            })
+          )}
+        </div>
+
+        {selectedItem ? (
+          <div className="palette-footer">
+            <span>{selectedItem.group === "entries" ? "Entry" : "Page"}</span>
+            <span>{selectedItem.href}</span>
+          </div>
+        ) : null}
+      </div>
+    </div>,
+    document.body
   );
 }
