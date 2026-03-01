@@ -14,10 +14,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body>
-        <main>
-          <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <h1 style={{ margin: 0 }}>Your Name</h1>
-            <nav>
+        <main className="site-main">
+          <header className="site-header">
+            <h1 className="site-title">Your Name</h1>
+            <nav className="site-nav">
               <Link href="/">Home</Link>
               <Link href="/about">About</Link>
               <Link href="/projects">Projects</Link>
