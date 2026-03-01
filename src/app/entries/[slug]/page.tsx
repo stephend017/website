@@ -1,10 +1,14 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getAllEntries, getEntryBySlug } from "@/lib/entries";
+"use client";
 
-type EntryPageProps = {
-  params: Promise<{ slug: string }>;
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useParams, notFound } from "next/navigation";
+
+type Entry = {
+  slug: string;
+  title: string;
+  date?: string;
+  summary: string;
 };
 
 function formatDate(date?: string): string {
@@ -28,42 +32,71 @@ async function loadEntryComponent(slug: string) {
   }
 }
 
-export async function generateStaticParams() {
-  const entries = await getAllEntries();
-  return entries.map((entry) => ({ slug: entry.slug }));
-}
-
-export async function generateMetadata({ params }: EntryPageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const entry = await getEntryBySlug(slug);
-
-  if (!entry) {
-    return { title: "Entry not found" };
+async function fetchEntry(slug: string) {
+  try {
+    const res = await fetch(`/api/entries/${slug}`);
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
   }
-
-  return {
-    title: entry.title,
-    description: entry.summary
-  };
 }
 
-export default async function EntryPage({ params }: EntryPageProps) {
-  const { slug } = await params;
-  const [entry, entryModule] = await Promise.all([getEntryBySlug(slug), loadEntryComponent(slug)]);
+export default function EntryPage() {
+  const params = useParams();
+  const slug = params.slug as string;
 
-  if (!entry || !entryModule) {
+  const [entry, setEntry] = useState<Entry | null>(null);
+  const [EntryComponent, setEntryComponent] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [notFoundFlag, setNotFoundFlag] = useState(false);
+
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        const entryData = await fetchEntry(slug);
+        const mdxModule = await loadEntryComponent(slug);
+
+        if (!entryData || !mdxModule) {
+          setNotFoundFlag(true);
+          return;
+        }
+
+        setEntry(entryData);
+        setEntryComponent(() => mdxModule.default);
+      } catch (error) {
+        setNotFoundFlag(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, [slug]);
+
+  if (notFoundFlag) {
     notFound();
   }
 
-  const EntryContent = entryModule.default;
+  if (isLoading) {
+    return <div className="entry-page">Loading...</div>;
+  }
+
+  if (!entry || !EntryComponent) {
+    notFound();
+  }
 
   return (
     <article className="entry-page">
-      <p className="entry-page-meta">{formatDate(entry.date)}</p>
-      <h1>{entry.title}</h1>
+      <div className="entry-card-top">
+        <p className="entry-page-meta">{formatDate(entry.date)}</p>
+        <p className="entry-slug">{entry.slug.replace(/-/g, " ")}</p>
+      </div>
+      <h1 className="entry-page-title">{entry.title}</h1>
       <p className="entry-page-summary">{entry.summary}</p>
       <div className="entry-content">
-        <EntryContent />
+        <EntryComponent />
       </div>
       <Link href="/#entries" className="entry-link entry-link--back">
         Back to all entries

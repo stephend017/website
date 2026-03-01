@@ -15,8 +15,6 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const entries = await getAllEntries();
   const commandItems = [
     { label: "Home", href: "/", detail: "Main feed", group: "pages" as const },
-    { label: "About", href: "/about", detail: "Profile and approach", group: "pages" as const },
-    { label: "Projects", href: "/projects", detail: "Project list", group: "pages" as const },
     ...entries.map((entry) => ({
       label: entry.title,
       href: `/entries/${entry.slug}`,
